@@ -170,12 +170,21 @@ class Saleae():
 		# be on every platform. For now, I'm making the hopefully reasonable and
 		# conservative assumption that if there's only one process running with
 		# 'logic' in the name, that it's Saleae Logic.
+		# On some Linux platforms, Saleae Logic's process name is "Main", so
+		# the exectuable file's name is also checked.
 		candidates = []
 		for proc in psutil.process_iter():
 			try:
-				if 'logic' in proc.name().lower():
+				# Get the name of the process
+				name = proc.name()
+
+				# Get the name of the executable file running
+				exe = proc.exe()
+				exe = os.path.basename(os.path.normpath(exe))
+
+				if 'logic' in name.lower() or 'logic' in exe.lower():
 					candidates.append(proc)
-			except psutil.NoSuchProcess:
+			except (psutil.NoSuchProcess, psutil.AccessDenied):
 				pass
 		return candidates
 
